@@ -8,12 +8,11 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-
 model User {
-  id Int @id @default(autoincrement())
-  email String @unique
-  password String
-  role UserRole @default(USER)
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  role      UserRole @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -24,12 +23,71 @@ enum UserRole {
 }
 
 model Category {
-  id Int @id @default(autoincrement())
+  id   Int    @id @default(autoincrement())
   name String
   slug String
 
-  parent Category? @relation("ParentCategory", onDelete: Cascade, fields: [parentId], references: [id])
+  parent   Category? @relation("ParentCategory", onDelete: Cascade, fields: [parentId], references: [id])
   parentId Int?
 
   children Category[] @relation("ParentCategory")
+
+  products Product[]
+}
+
+model Product {
+  id Int @id @default(autoincrement())
+
+  title       String
+  slug        String
+  description String
+
+  categories Category[]
+
+  specs ProductSpec[]
+
+  variants ProductVariant[]
+}
+
+model ProductSpec {
+  id   Int    @id @default(autoincrement())
+  key  String
+  name String
+
+  values    ProductSpecValue[]
+  Product   Product?           @relation(fields: [productId], references: [id])
+  productId Int?
+}
+
+model ProductSpecValue {
+  id Int @id @default(autoincrement())
+
+  key           String
+  value         String
+  ProductSpec   ProductSpec? @relation(fields: [productSpecId], references: [id])
+  productSpecId Int?
+}
+
+model ProductVariant {
+  id Int @id @default(autoincrement())
+
+  stock    Int      @default(0)
+  price    Decimal
+  discount Int      @default(0)
+  slug     String
+  images   String[]
+
+  specs ProductVariantSpec[]
+
+  Product   Product? @relation(fields: [productId], references: [id])
+  productId Int?
+}
+
+model ProductVariantSpec {
+  id Int @id @default(autoincrement())
+
+  key              String
+  value            String
+  ProductVariant   ProductVariant? @relation(fields: [productVariantId], references: [id])
+  productVariantId Int?
 }
