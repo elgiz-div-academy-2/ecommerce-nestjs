@@ -55,7 +55,7 @@ model ProductSpec {
   name String
 
   values    ProductSpecValue[]
-  Product   Product?           @relation(fields: [productId], references: [id])
+  Product   Product?           @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int?
 }
 
@@ -64,7 +64,7 @@ model ProductSpecValue {
 
   key           String
   value         String
-  ProductSpec   ProductSpec? @relation(fields: [productSpecId], references: [id])
+  ProductSpec   ProductSpec? @relation(fields: [productSpecId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   productSpecId Int?
 }
 
@@ -79,7 +79,7 @@ model ProductVariant {
 
   specs ProductVariantSpec[]
 
-  Product   Product? @relation(fields: [productId], references: [id])
+  Product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int?
 }
 
@@ -88,6 +88,6 @@ model ProductVariantSpec {
 
   key              String
   value            String
-  ProductVariant   ProductVariant? @relation(fields: [productVariantId], references: [id])
+  ProductVariant   ProductVariant? @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
   productVariantId Int?
 }

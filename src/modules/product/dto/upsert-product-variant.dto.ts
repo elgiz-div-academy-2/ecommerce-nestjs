@@ -13,13 +13,13 @@ import {
 export class UpsertProductVariantSpecDto {
   @Type()
   @IsString()
-  @MinLength(3)
+  @MinLength(1)
   @ApiProperty({ default: 'color' })
   key: string;
 
   @Type()
   @IsString()
-  @MinLength(3)
+  @MinLength(1)
   @ApiProperty({ default: 'orange' })
   value: string;
 }

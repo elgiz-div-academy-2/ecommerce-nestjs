@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, OmitType, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsArray,
@@ -11,13 +11,13 @@ import {
 export class CreateProductSpecValueDto {
   @Type()
   @IsString()
-  @MinLength(3)
+  @MinLength(1)
   @ApiProperty({ default: 'orange' })
   key: string;
 
   @Type()
   @IsString()
-  @MinLength(3)
+  @MinLength(1)
   @ApiProperty({ default: 'Orange' })
   value: string;
 }
@@ -73,3 +73,7 @@ export class CreateProductDto {
   @ApiProperty({ type: CreateProductSpecDto, isArray: true })
   specs: CreateProductSpecDto[];
 }
+
+export class UpdateProductDto extends PartialType(
+  OmitType(CreateProductDto, ['specs']),
+) {}
