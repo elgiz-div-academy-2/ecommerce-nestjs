@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="recaptcha-container"></div>
+    <input id="phone" placholder="+9941235678" />
+    <button id="signInPhone" type="button">Sign in with Phone</button>
+
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js';
+      import {
+        getAuth,
+        signInWithPhoneNumber,
+        RecaptchaVerifier,
+        signInWithPopup,
+      } from 'https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js';
+
+      const firebaseConfig = {
+        apiKey: 'AIzaSyCuA9YbwPI7bJg83vhHvPmbCZf-HEO8D-U',
+        authDomain: 'ecommerce-4d448.firebaseapp.com',
+        projectId: 'ecommerce-4d448',
+        storageBucket: 'ecommerce-4d448.firebasestorage.app',
+        messagingSenderId: '199017804150',
+        appId: '1:199017804150:web:3617a6616892626a380a57',
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+
+      const auth = getAuth(app);
+
+      window.recaptchaVerifier = new RecaptchaVerifier(
+        auth,
+        'recaptcha-container',
+        {
+          size: 'normal',
+        },
+      );
+
+      recaptchaVerifier.render().then((widgetId) => {
+        window.recaptchaWidgetId = widgetId;
+      });
+
+      function onSignInSubmit() {}
+
+      document
+        .getElementById('signInPhone')
+        .addEventListener('click', async () => {
+          const phoneNumber = document.getElementById('phone').value;
+          let confirmResult = await signInWithPhoneNumber(
+            auth,
+            phoneNumber,
+            window.recaptchaVerifier,
+          ).catch((err) => {
+            console.log(err);
+          });
+
+          if (!confirmResult) return alert('Something went wrong');
+
+          const code = prompt("please type code you've recevied");
+          let firebaseResult = await confirmResult
+            .confirm(code)
+            .catch((err) => false);
+
+          if (!firebaseResult) return alert('Code is wrong');
+
+          let token = firebaseResult.user.accessToken;
+          let result = await fetch('http://localhost:3000/api/auth/firebase', {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json',
+            },
+            body: JSON.stringify({
+              token,
+            }),
+          });
+          let response = await result.json();
+          console.log(response);
+        });
+    </script>
+  </body>
+</html>

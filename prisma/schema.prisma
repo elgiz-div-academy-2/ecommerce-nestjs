@@ -10,11 +10,27 @@ datasource db {
 
 model User {
   id        Int      @id @default(autoincrement())
-  email     String   @unique
+  email     String?   @unique 
   password  String
+  phone String? @unique
+  provider UserProvider @default(LOCAL)
+  providerId String?
+  providerType ProviderType? @default(EMAIL)
   role      UserRole @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum ProviderType {
+  GOOGLE
+  PHONE
+  FACEBOOK
+  EMAIL
+}
+
+enum UserProvider {
+  LOCAL
+  FIREBASE
 }
 
 enum UserRole {

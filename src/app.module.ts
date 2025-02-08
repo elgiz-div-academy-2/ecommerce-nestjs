@@ -10,6 +10,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClsModule } from 'nestjs-cls';
 import { CategoryModule } from './modules/category/category.module';
 import { ProductModule } from './modules/product/product.module';
+import { FirebaseModule } from './libs/firebase/firebase.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ProductModule } from './modules/product/product.module';
       global: true,
       guard: { mount: true },
     }),
+    FirebaseModule,
     PrismaModule,
     UserModule,
     AuthModule,
