@@ -1,0 +1,7 @@
+{
+  "response": {
+    "created": "Kullanıcı başarıyla oluşturuldu",
+    "updated": "Kullanıcı güncellendi",
+    "notFound": "Bu {id} kullanıcı bulunamadı"
+  }
+}

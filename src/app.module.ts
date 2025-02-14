@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { UserModule } from './modules/user/user.module';
@@ -11,6 +11,8 @@ import { ClsModule } from 'nestjs-cls';
 import { CategoryModule } from './modules/category/category.module';
 import { ProductModule } from './modules/product/product.module';
 import { FirebaseModule } from './libs/firebase/firebase.module';
+import { AcceptLanguageResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
+import { LanguageMiddleware } from './middleware/i18n.middleware';
 
 @Module({
   imports: [
@@ -31,9 +33,22 @@ import { FirebaseModule } from './libs/firebase/firebase.module';
         };
       },
     }),
+    I18nModule.forRoot({
+      fallbackLanguage: 'en',
+      loaderOptions: {
+        path: join(__dirname, '/i18n/'),
+        watch: true,
+      },
+      resolvers: [
+        new QueryResolver(['lang', 'language']),
+        new AcceptLanguageResolver(),
+      ],
+      typesOutputPath: join(__dirname, '../src/generated/i18n.generated.ts'),
+    }),
 
     ClsModule.forRoot({
       global: true,
+      middleware: { mount: true },
       guard: { mount: true },
     }),
     FirebaseModule,
@@ -46,4 +61,8 @@ import { FirebaseModule } from './libs/firebase/firebase.module';
   controllers: [],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    return consumer.apply(LanguageMiddleware).forRoutes('*');
+  }
+}
