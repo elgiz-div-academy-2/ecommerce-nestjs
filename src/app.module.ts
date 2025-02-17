@@ -13,6 +13,7 @@ import { ProductModule } from './modules/product/product.module';
 import { FirebaseModule } from './libs/firebase/firebase.module';
 import { AcceptLanguageResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
 import { LanguageMiddleware } from './middleware/i18n.middleware';
+import { ContentModule } from './modules/content/content.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { LanguageMiddleware } from './middleware/i18n.middleware';
     AuthModule,
     CategoryModule,
     ProductModule,
+    ContentModule,
   ],
   controllers: [],
   providers: [AppService],

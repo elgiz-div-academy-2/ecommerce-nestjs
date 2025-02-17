@@ -4,6 +4,7 @@ import {
   IsArray,
   IsNumber,
   IsString,
+  Length,
   MinLength,
   ValidateNested,
 } from 'class-validator';
@@ -42,7 +43,7 @@ export class CreateProductSpecDto {
   values: CreateProductSpecValueDto[];
 }
 
-export class CreateProductDto {
+export class CreateProductTranslation {
   @Type()
   @IsString()
   @MinLength(3)
@@ -60,6 +61,20 @@ export class CreateProductDto {
   @MinLength(3)
   @ApiProperty({ default: 'good quality' })
   description: string;
+
+  @Type()
+  @IsString()
+  @Length(2, 2)
+  @ApiProperty({ default: 'en' })
+  lang: string;
+}
+
+export class CreateProductDto {
+  @Type(() => CreateProductTranslation)
+  @IsArray()
+  @ValidateNested({ each: true })
+  @ApiProperty({ type: CreateProductTranslation, isArray: true })
+  translations: CreateProductTranslation[];
 
   @Type()
   @IsNumber({}, { each: true })

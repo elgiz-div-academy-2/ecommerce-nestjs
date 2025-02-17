@@ -1,6 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateCategoryDto } from './dto/create-category.dto';
+import {
+  CreateCategoryDto,
+  CreateCategoryTranslations,
+} from './dto/create-category.dto';
 import { Category, Prisma } from '@prisma/client';
 import { CategoryWithChildren } from './category.types';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -52,9 +55,79 @@ export class CategoryService {
       },
     });
 
+    let translations = await this.createTranslations(
+      category,
+      params.translations,
+    );
+
+    await this.prisma.category.update({
+      where: { id: category.id },
+      data: {
+        translations: {
+          connect: translations,
+        },
+      },
+    });
+    category.translations = translations;
+
+    return category;
+  }
+
+  async update(id: number, params: UpdateCategoryDto) {
+    let category = await this.prisma.category.findUnique({
+      where: { id },
+      include: {
+        translations: true,
+      },
+    });
+
+    if (!category) throw new NotFoundException('Category is not found');
+
+    if (params.translations) {
+      await this.prisma.translation.deleteMany({
+        where: {
+          id: {
+            in: category.translations.map((data) => data.id),
+          },
+        },
+      });
+
+      let translations = await this.createTranslations(
+        category,
+        params.translations,
+      );
+
+      await this.prisma.category.update({
+        where: { id: category.id },
+        data: {
+          ...params,
+          translations: {
+            connect: translations,
+          },
+        },
+      });
+    } else {
+      await this.prisma.category.update({
+        where: { id: category.id },
+        data: {
+          ...params,
+          translations: undefined,
+        },
+      });
+    }
+
+    return {
+      message: 'Category is updated successfully',
+    };
+  }
+
+  createTranslations(
+    category: Category,
+    translations: CreateCategoryTranslations[],
+  ) {
     let locales: any = [];
 
-    for (let translation of params.translations) {
+    for (let translation of translations) {
       locales.push({
         model: 'category',
         modelId: category.id,
@@ -72,39 +145,25 @@ export class CategoryService {
       });
     }
 
-    let translations = await this.prisma.translation.createManyAndReturn({
+    return this.prisma.translation.createManyAndReturn({
       data: locales,
     });
-
-    await this.prisma.category.update({
-      where: { id: category.id },
-      data: {
-        translations: {
-          connect: translations,
-        },
-      },
-    });
-    category.translations = translations;
-
-    return category;
-  }
-
-  async update(id: number, params: UpdateCategoryDto) {
-    let category = await this.prisma.category.findUnique({ where: { id } });
-
-    if (!category) throw new NotFoundException('Category is not found');
-
-    await this.prisma.category.update({
-      where: { id: category.id },
-      data: {}, //params,
-    });
-
-    return {
-      message: 'Category is updated successfully',
-    };
   }
 
   async deleteCategory(id: number) {
-    return this.prisma.category.delete({ where: { id } });
+    let category = await this.prisma.category.findFirst({ where: { id } });
+    if (!category) throw new NotFoundException('Category is not found');
+
+    await this.prisma.category.delete({ where: { id } });
+    await this.prisma.translation.deleteMany({
+      where: {
+        model: 'category',
+        modelId: category.id,
+      },
+    });
+
+    return {
+      message: 'Category is deleted sucecssfully',
+    };
   }
 }

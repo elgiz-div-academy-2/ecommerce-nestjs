@@ -1,18 +1,7 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
-import { AuthGuard } from 'src/shared/guards/auth.guard';
-import { Roles } from 'src/shared/decorators/role.decorator';
 import { UserRole } from '@prisma/client';
-import { ApiBearerAuth } from '@nestjs/swagger';
 import { Auth } from 'src/shared/decorators/auth.decorator';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 

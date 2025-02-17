@@ -9,7 +9,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-class CreateCategoryTranslations {
+export class CreateCategoryTranslations {
   @Type()
   @IsString()
   @MinLength(3)

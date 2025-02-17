@@ -38,6 +38,17 @@ enum UserRole {
   ADMIN
 }
 
+model Content {
+  id Int @id @default(autoincrement())
+
+  title Json
+
+  content Json
+
+  slug Json
+}
+
+
 model Translation {
   id Int @id @default(autoincrement())
 
@@ -65,18 +76,28 @@ model Category {
   products Product[]
 }
 
-model Product {
+model ProductTranslation {
   id Int @id @default(autoincrement())
 
   title       String
   slug        String
   description String
+  lang String
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+}
+
+model Product {
+  id Int @id @default(autoincrement())
 
   categories Category[]
 
   specs ProductSpec[]
 
   variants ProductVariant[]
+
+  translations ProductTranslation[]
 }
 
 model ProductSpec {

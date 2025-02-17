@@ -11,11 +11,17 @@ import { UpsertProductSpecDto } from './dto/upsert-product-spec.dto';
 import { GetProductListDto } from './dto/get-product-list.dto';
 
 import { Prisma } from '@prisma/client';
+import { ClsService } from 'nestjs-cls';
 @Injectable()
 export class ProductService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private cls: ClsService,
+    private prisma: PrismaService,
+  ) {}
 
-  list(params: GetProductListDto) {
+  async list(params: GetProductListDto) {
+    let lang = this.cls.get('lang');
+
     let where: Prisma.ProductWhereInput = {};
 
     if (params.category) {
@@ -68,9 +74,21 @@ export class ProductService {
       }
     }
 
-    return this.prisma.product.findMany({
+    let products = await this.prisma.product.findMany({
       where,
       include: {
+        translations: {
+          where: {
+            OR: [
+              {
+                lang,
+              },
+              {
+                lang: 'en',
+              },
+            ],
+          },
+        },
         categories: true,
         variants: {
           include: {
@@ -78,6 +96,19 @@ export class ProductService {
           },
         },
       },
+    });
+
+    return products.map((product) => {
+      let translationData = {
+        ...product.translations[0],
+        lang: undefined,
+        productId: undefined,
+      };
+      return {
+        ...translationData,
+        ...product,
+        translations: undefined,
+      };
     });
   }
 
@@ -104,7 +135,6 @@ export class ProductService {
     const categories = params.categories.map((categoryId) => ({
       id: categoryId,
     }));
-
     const specs = params.specs.map((spec) => ({
       ...spec,
       values: { create: spec.values },
@@ -113,6 +143,9 @@ export class ProductService {
     return this.prisma.product.create({
       data: {
         ...params,
+        translations: {
+          create: params.translations,
+        },
         categories: { connect: categories },
         specs: { create: specs },
       },
@@ -122,6 +155,7 @@ export class ProductService {
             values: true,
           },
         },
+        translations: true,
       },
     });
   }
@@ -136,16 +170,16 @@ export class ProductService {
 
     const categories = params.categories?.map((category) => ({ id: category }));
 
-    return await this.prisma.product.update({
-      where: { id },
-      data: {
-        ...params,
-        categories: categories && {
-          disconnect: product.categories,
-          connect: categories,
-        },
-      },
-    });
+    // return await this.prisma.product.update({
+    //   where: { id },
+    //   data: {
+    //     ...params,
+    //     categories: categories && {
+    //       disconnect: product.categories,
+    //       connect: categories,
+    //     },
+    //   },
+    // });
   }
 
   async deleteProduct(id: number) {
